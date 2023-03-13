@@ -4,9 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientChatEvent;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,7 +32,6 @@ public class ForgeEvents {
                     }
                 }
             }
-            toggleCoords(player);
         }
     }
 
@@ -50,13 +49,10 @@ public class ForgeEvents {
         onEnteringSection(new EntityEvent.EnteringSection(event.getEntity(), 0L, 0L));
     }
 
-    private static void toggleCoords(final Player player) {
-        final var world = player.getCommandSenderWorld();
-        if (world.isClientSide || player.hasPermissions(2)) {
-            world.getGameRules()
-                    .getRule(GameRules.RULE_REDUCEDDEBUGINFO)
-                    .set(inBlacklistedArea, player.getCommandSenderWorld().getServer());
-        }
+    @SubscribeEvent
+    public static void onDebugScreen(final CustomizeGuiOverlayEvent.DebugText event) {
+        if (inBlacklistedArea)
+            event.getLeft().removeIf((line) -> line.startsWith("XYZ: ") || line.startsWith("Block: ") || line.startsWith("Chunk: ") || line.startsWith("Chunks["));
     }
 
 }

@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 // todo: support server-side-only, too
 @Mod(Coordints.MODID)
 public class Coordints {
+    private static final Logger LOGGER = LogUtils.getLogger();
     static final String MODID = "coordints";
-    static final Logger LOGGER = LogUtils.getLogger();
 
     public Coordints() {
         LOGGER.info("Coordin'ts starting");

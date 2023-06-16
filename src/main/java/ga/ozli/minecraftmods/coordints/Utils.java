@@ -23,11 +23,7 @@ final class Utils {
         if (coordRedactor == null) coordRedactor = DEFAULT_COORD_REDACTOR;
 
         // first, get all parts of the string that contain a number
-        final var matcher = NUMBER_PATTERN.matcher(message);
-        final List<String> numberParts = new ObjectArrayList<>();
-        while (matcher.find()) {
-            numberParts.add(matcher.group());
-        }
+        final List<String> numberParts = getNumberParts(message);
 
         // convert the number parts to doubles
         final double[] numbers = numberParts.stream().mapToDouble(Double::parseDouble).toArray();
@@ -49,11 +45,7 @@ final class Utils {
 
     static boolean messageContainsCoords(final String message) {
         // first, get all parts of the string that contain a number
-        final var matcher = NUMBER_PATTERN.matcher(message);
-        final List<String> numberParts = new ObjectArrayList<>();
-        while (matcher.find()) {
-            numberParts.add(matcher.group());
-        }
+        final List<String> numberParts = getNumberParts(message);
 
         // convert the number parts to doubles
         final double[] numbers = numberParts.stream().mapToDouble(Double::parseDouble).toArray();
@@ -85,5 +77,14 @@ final class Utils {
     private static double getSensitivity(final double number) {
         // use a higher sensitivity for coords with 3 digits
         return number < 999 && number > -999 ? 0.2 : 0.1;
+    }
+
+    private static List<String> getNumberParts(final String message) {
+        final var matcher = NUMBER_PATTERN.matcher(message);
+        final List<String> numberParts = new ObjectArrayList<>();
+        while (matcher.find()) {
+            numberParts.add(matcher.group());
+        }
+        return numberParts;
     }
 }

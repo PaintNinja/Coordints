@@ -3,15 +3,14 @@ package ga.ozli.minecraftmods.coordints;
 import com.electronwill.nightconfig.core.EnumGetMethod;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.DoubleStream;
 
-@Mod.EventBusSubscriber(modid = Coordints.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 final class Config {
     private static final Pattern BRACKETS_PATTERN = Pattern.compile("[\\[\\]()]");
     private static final Pattern COORDS_PATTERN = Pattern.compile("-?\\d+\\s-?\\d+,-?\\d+\\s-?\\d+");
@@ -37,7 +36,6 @@ final class Config {
         return obj instanceof final String coords && COORDS_PATTERN.matcher(BRACKETS_PATTERN.matcher(coords).replaceAll("")).matches();
     }
 
-    @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         USE_BLACKLIST = !BLACKLISTED_COORDS_STRINGS.get().isEmpty();
 

@@ -1,91 +1,57 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'org.groovymc.modsdotgroovy' version '1.3.1'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'groovy'
+    id 'eclipse'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.groovymc.modsdotgroovy' version '1.4.1'
 }
 
-version = '1.19.4-0.1'
-group = 'ga.ozli.minecraftmods.coordints' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'coordints'
+version = '1.20.x-0.2'
+group = 'ga.ozli.minecraftmods.coordints'
+base.archivesName = 'coordints'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-modsDotGroovy {
-    dslVersion = '1.4.0'
-}
-
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-    mappings channel: 'parchment', version: '1.19.3-2023.03.12-1.19.4'
+    mappings channel: 'official', version: '1.20'
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
-        client {
+        // applies to all run configs
+        configureEach {
             workingDirectory project.file('run')
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'coordints'
-
             mods {
-                coordints {
+                "${archivesBaseName}" {
                     source sourceSets.main
                 }
             }
         }
 
+        client {
+            property 'forge.enabledGameTestNamespaces', archivesBaseName
+        }
+
         server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.console.level', 'debug'
-
-            property 'forge.enabledGameTestNamespaces', 'coordints'
-
-            mods {
-                coordints {
-                    source sourceSets.main
-                }
-            }
+            property 'forge.enabledGameTestNamespaces', archivesBaseName
+            args '--nogui'
         }
 
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.console.level', 'debug'
-
-            property 'forge.enabledGameTestNamespaces', 'coordints'
-
-            mods {
-                coordints {
-                    source sourceSets.main
-                }
-            }
+            property 'forge.enabledGameTestNamespaces', archivesBaseName
         }
 
         data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.console.level', 'debug'
-
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'coordints', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                coordints {
-                    source sourceSets.main
-                }
-            }
+            args '--mod', archivesBaseName, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
     }
 }
@@ -94,33 +60,56 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
+    maven {
+        name = 'Modding Inquisition Releases'
+        url = 'https://maven.moddinginquisition.org/releases'
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.40'
-    compileOnly localGroovy()
-    compileOnly 'io.github.groovymc.modsdotgroovy:dsl:1.4.0'
+    // Forge
+    minecraft 'net.minecraftforge:forge:1.20-46.0.14'
+
+    // GroovyModLoader
+    compileOnly 'org.groovymc.gml:gml:4.0.2'
+    runtimeOnly('org.groovymc.gml:gml:4.0.2:all') {
+        exclude module: 'transform'
+    }
+
+    // CommonGroovyLibrary (bundled with GML)
+    compileOnly 'org.groovymc.cgl:cgl-1.20-forge:0.3.3'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar) {
     manifest {
         attributes([
-                "Specification-Title"     : "Coordin'ts",
-                "Specification-Vendor"    : "Paint_Ninja",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "Paint_Ninja",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'Specification-Title'     : "Coordin'ts",
+                'Specification-Vendor'    : 'Paint_Ninja',
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : archivesBaseName,
+                'Implementation-Version'  : archiveVersion,
+                'Implementation-Vendor'   : 'Paint_Ninja',
         ])
     }
+
+    reproducibleFileOrder = true
+    preserveFileTimestamps = false
 
     finalizedBy 'reobfJar'
 }
 
+tasks.withType(GroovyCompile).configureEach {
+    options.incremental = true
+    groovyOptions.encoding = 'UTF-8' // Use the UTF-8 charset for Groovy compilation
+    groovyOptions.optimizationOptions.indy = true
+    groovyOptions.optimizationOptions.groovydoc = true
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+modsDotGroovy {
+    dslVersion = '1.5.0'
 }

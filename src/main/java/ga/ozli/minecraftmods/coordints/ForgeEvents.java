@@ -37,10 +37,19 @@ public class ForgeEvents {
 
     @SubscribeEvent
     public static void onSendChatMessage(final ClientChatEvent event) {
-        if (Utils.messageContainsCoords(event.getMessage(), Config.BLACKLISTED_COORDS)) {
-            assert Minecraft.getInstance().player != null;
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("messages.coordints.blocked").withStyle(style -> style.withColor(ChatFormatting.RED)), true);
-            event.setCanceled(true);
+        final String message = event.getMessage();
+        if (Utils.messageContainsCoords(message)) {
+            switch (Config.BLACKLIST_ACTION) {
+                case REDACT -> event.setMessage(Utils.redactCoords(message));
+                case RANDOMISE -> event.setMessage(Utils.redactCoords(message, s -> String.valueOf(Utils.RANDOM.nextInt())));
+                case BLOCK -> {
+                    assert Minecraft.getInstance().player != null;
+                    Minecraft.getInstance().player
+                            .displayClientMessage(Component.translatable("messages.coordints.blocked")
+                            .withStyle(style -> style.withColor(ChatFormatting.RED)), true);
+                    event.setCanceled(true);
+                }
+            }
         }
     }
 
@@ -52,7 +61,7 @@ public class ForgeEvents {
     @SubscribeEvent
     public static void onDebugScreen(final CustomizeGuiOverlayEvent.DebugText event) {
         if (inBlacklistedArea)
-            event.getLeft().removeIf((line) -> line.startsWith("XYZ: ") || line.startsWith("Block: ") || line.startsWith("Chunk: ") || line.startsWith("Chunks["));
+            event.getLeft().removeIf(line -> line.startsWith("XYZ: ") || line.startsWith("Block: ") || line.startsWith("Chunk: ") || line.startsWith("Chunks["));
     }
 
 }

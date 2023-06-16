@@ -1,16 +1,27 @@
 package ga.ozli.minecraftmods.coordints;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 final class Utils {
-    private static final Pattern NUMBER_PATTERN = Pattern.compile("(-?\\d+[.,]?\\d+)");
-    private static final Random RANDOM = new Random();
+    static final Random RANDOM = new Random();
 
-    static String redactCoordsFromMessage(String message, final double[] blacklist) {
+    // redact the number with a random amount of Xs between 1 and 5
+    private static final Function<String, String> DEFAULT_COORD_REDACTOR = s -> "X".repeat(RANDOM.nextInt(5) + 1);
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("(-?\\d+[.,]?\\d+)");
+
+    static String redactCoords(final String message) {
+        return redactCoords(message, null);
+    }
+
+    static String redactCoords(String message, @Nullable Function<String, String> coordRedactor) {
+        if (coordRedactor == null) coordRedactor = DEFAULT_COORD_REDACTOR;
+
         // first, get all parts of the string that contain a number
         final var matcher = NUMBER_PATTERN.matcher(message);
         final List<String> numberParts = new ObjectArrayList<>();
@@ -24,10 +35,11 @@ final class Utils {
         // then, check if any of those parts are close to a blacklisted coordinate
         for (int i = 0; i < numbers.length; i++) {
             final double number = numbers[i];
-            for (final double blacklistedCoord : blacklist) {
-                if (relativeDifference(number, blacklistedCoord) < 0.1) {
-                    // if so, redact the number with a random number of Xs between 1 and 3
-                    message = message.replace(numberParts.get(i), "X".repeat(RANDOM.nextInt(3) + 1));
+            final double sensitivity = getSensitivity(number);
+            for (final double blacklistedCoord : Config.BLACKLISTED_COORDS) {
+                if (relativeDifference(number, blacklistedCoord) < sensitivity) {
+                    // if so, redact the coordinate number from the message
+                    message = message.replace(numberParts.get(i), coordRedactor.apply(numberParts.get(i)));
                 }
             }
         }
@@ -35,7 +47,7 @@ final class Utils {
         return message;
     }
 
-    static boolean messageContainsCoords(final String message, final double[] blacklist) {
+    static boolean messageContainsCoords(final String message) {
         // first, get all parts of the string that contain a number
         final var matcher = NUMBER_PATTERN.matcher(message);
         final List<String> numberParts = new ObjectArrayList<>();
@@ -49,9 +61,9 @@ final class Utils {
         // then, check if any of those parts are close to a blacklisted coordinate
         for (final double number : numbers) {
             // use a higher sensitivity for coords with 3 digits
-            final double sensitivity = number < 999 && number > -999 ? 0.2 : 0.1;
+            final double sensitivity = getSensitivity(number);
 
-            for (final double blacklistedCoord : blacklist) {
+            for (final double blacklistedCoord : Config.BLACKLISTED_COORDS) {
                 if (relativeDifference(number, blacklistedCoord) <= sensitivity)
                     return true;
             }
@@ -68,5 +80,10 @@ final class Utils {
      */
     private static double relativeDifference(final double a, final double b) {
         return Math.abs(a - b) / ((a + b) / 2.0);
+    }
+
+    private static double getSensitivity(final double number) {
+        // use a higher sensitivity for coords with 3 digits
+        return number < 999 && number > -999 ? 0.2 : 0.1;
     }
 }

@@ -1,6 +1,6 @@
 ModsDotGroovy.make {
     modLoader = 'javafml'
-    loaderVersion = '[44,)'
+    loaderVersion = '[45,)'
 
     license = 'MIT'
     issueTrackerUrl = 'https://github.com/PaintNinja/Coordints/issues'
@@ -15,8 +15,8 @@ ModsDotGroovy.make {
         displayTest = DisplayTest.IGNORE_ALL_VERSION
 
         dependencies {
-            forge = '>=44.1.0'
-            minecraft = '1.19.3'
+            forge = '>=45.0.40'
+            minecraft = '1.19.4'
         }
     }
 }

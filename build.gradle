@@ -1,10 +1,10 @@
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'io.github.groovymc.modsdotgroovy' version '1.1.2'
+    id 'org.groovymc.modsdotgroovy' version '1.3.1'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
-version = '1.19.3-1.0'
+version = '1.19.4-0.1'
 group = 'ga.ozli.minecraftmods.coordints' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'coordints'
 
@@ -12,12 +12,12 @@ archivesBaseName = 'coordints'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 modsDotGroovy {
-    dslVersion = '1.3.0'
+    dslVersion = '1.4.0'
 }
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-    mappings channel: 'parchment', version: '2023.02.26-1.19.3'
+    mappings channel: 'parchment', version: '1.19.3-2023.03.12-1.19.4'
 
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
@@ -99,9 +99,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.3-44.1.23'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.40'
     compileOnly localGroovy()
-    compileOnly 'io.github.groovymc.modsdotgroovy:dsl:1.3.0'
+    compileOnly 'io.github.groovymc.modsdotgroovy:dsl:1.4.0'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

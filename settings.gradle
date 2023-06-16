@@ -6,3 +6,9 @@ pluginManagement {
         maven { url = 'https://maven.moddinginquisition.org/releases' }
     }
 }
+
+buildCache {
+    remote(HttpBuildCache) {
+        url = 'https://gradlecache.groovymc.org/cache/'
+    }
+}

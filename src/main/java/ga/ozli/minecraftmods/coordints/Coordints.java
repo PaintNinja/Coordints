@@ -7,6 +7,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import org.slf4j.Logger;
 
 // todo: support server-side-only, too
+// todo: support different blacklists for different worlds and servers
 @Mod(Coordints.MODID)
 public class Coordints {
     private static final Logger LOGGER = LogUtils.getLogger();
